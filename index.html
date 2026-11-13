@@ -1,130 +1,15 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LOTO 5/90 - ADMIN</title>
-<style>
-body{background:#111;color:#fff;font-family:Arial;padding:15px;margin:0}
-h1{text-align:center}
-.box{background:#222;padding:15px;border-radius:15px;margin-bottom:15px}
-input,button{width:100%;padding:12px;margin:5px 0;border-radius:10px;border:none;font-size:16px;box-sizing:border-box}
-input{background:#333;color:#fff}
-button{background:#FFD700;font-weight:bold;cursor:pointer}
-.btn-red{background:#ff3b30;color:#fff}
-.btn-green{background:#28a745;color:#fff}
-.ticket{background:#333;padding:10px;border-radius:10px;margin:5px 0}
-.gagnant{border:2px solid #FFD700}
-</style>
-</head>
-<body>
-<div id="login" class="box">
-<h1>👑 LOTO 5/90</h1>
-<p style="text-align:center">ESPACE ADMIN - BOSS UNIQUEMENT</p>
-<input type="password" id="mdp" placeholder="Mot de passe Boss">
-<button onclick="connexion()">ENTRER 👑</button>
-</div>
-
-<div id="admin" style="display:none">
-<h1>👑 Bienvenue Boss</h1>
-<p id="date" style="text-align:center"></p>
-
-<div class="box">
-<h3>💰 Total encaissé aujourd'hui : <span id="total">0</span> F CFA</h3>
-<h3>🎫 Tickets vendus : <span id="nbTickets">0</span></h3>
-<h3>🏆 Gagnants à payer : <span id="nbGagnants">0</span></h3>
-<h3>🎲 Dernier tirage : <span id="dernierTirage">Pas encore</span></h3>
-</div>
-
-<div class="box">
-<h3>🎲 CRÉER UN TIRAGE</h3>
-<input type="date" id="dateTirage">
-<input type="time" id="heureTirage" value="20:00">
-<button class="btn-green" onclick="creerTirage()">CRÉER LE TIRAGE ✅</button>
-<div id="listeTirages"></div>
-</div>
-
-<div class="box">
-<h3>🏆 NUMÉROS GAGNANTS</h3>
-<p>Choisis le tirage puis entre les 5 numéros :</p>
-<input type="number" id="n1" placeholder="Numéro 1 (1-90)" min="1" max="90">
-<input type="number" id="n2" placeholder="Numéro 2" min="1" max="90">
-<input type="number" id="n3" placeholder="Numéro 3" min="1" max="90">
-<input type="number" id="n4" placeholder="Numéro 4" min="1" max="90">
-<input type="number" id="n5" placeholder="Numéro 5" min="1" max="90">
-<button onclick="publierResultat()">PUBLIER LES RÉSULTATS 🏆</button>
-</div>
-
-<div class="box">
-<h3>🎫 TICKETS DES JOUEURS</h3>
-<button onclick="ajouterTicketTest()">+ Ajouter un ticket test</button>
-<div id="listeTickets"></div>
-<button class="btn-red" onclick="effacerTout()">EFFACER TOUT 🗑️</button>
-</div>
-
-<button class="btn-red" onclick="deconnexion()">DÉCONNEXION</button>
-</div>
-
-<script>
-const MOT_DE_PASSE_ADMIN = "atchissou229lot";
-let tirages = JSON.parse(localStorage.getItem('tirages')||'[]');
-let tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
-let resultats = JSON.parse(localStorage.getItem('resultats')||'{}');
-
-document.getElementById('date').innerText = new Date().toLocaleString('fr-FR');
-
-function connexion(){
-  if(document.getElementById('mdp').value === MOT_DE_PASSE_ADMIN){
-    document.getElementById('login').style.display='none';
-    document.getElementById('admin').style.display='block';
-    afficher();
-  } else { alert('Mauvais mot de passe Boss !'); }
-}
-function deconnexion(){ location.reload(); }
-function sauvegarder(){
-  localStorage.setItem('tirages', JSON.stringify(tirages));
-  localStorage.setItem('tickets', JSON.stringify(tickets));
-  localStorage.setItem('resultats', JSON.stringify(resultats));
-  afficher();
-}
-function creerTirage(){
-  let d = document.getElementById('dateTirage').value;
-  let h = document.getElementById('heureTirage').value;
-  if(!d){ alert('Choisis une date !'); return; }
-  tirages.push({date:d, heure:h, id: Date.now()});
-  sauvegarder(); alert('Tirage créé Boss ! 👑');
-}
-function publierResultat(){
-  let nums = [n1.value,n2.value,n3.value,n4.value,n5.value].map(Number);
-  if(nums.some(n=>!n || n<1 || n>90)){ alert('Mets les 5 numéros entre 1 et 90'); return; }
-  resultats.dernier = nums;
-  resultats.date = new Date().toLocaleString('fr-FR');
-  sauvegarder(); alert('Résultats publiés : ' + nums.join(' - '));
-}
-function ajouterTicketTest(){
-  let nums = [];
-  while(nums.length<5){ let n=Math.floor(Math.random()*90)+1; if(!nums.includes(n)) nums.push(n); }
-  tickets.push({id: Date.now(), numeros: nums, mise: 500, nom: 'Test Joueur', tel: '97000000'});
-  sauvegarder();
-}
-function effacerTout(){ if(confirm('Effacer tout Boss ?')){ tirages=[]; tickets=[]; resultats={}; sauvegarder(); } }
-function afficher(){
-  let total = tickets.reduce((s,t)=>s+t.mise,0);
-  document.getElementById('total').innerText = total;
-  document.getElementById('nbTickets').innerText = tickets.length;
-  let gagnants = 0;
-  if(resultats.dernier){
-    gagnants = tickets.filter(t=> t.numeros.filter(n=> resultats.dernier.includes(n)).length>=3).length;
-    document.getElementById('dernierTirage').innerText = resultats.dernier.join(' - ');
-  }
-  document.getElementById('nbGagnants').innerText = gagnants;
-  document.getElementById('listeTirages').innerHTML = tirages.map(t=>`<div class="ticket">📅 ${t.date} à ${t.heure}</div>`).join('') || 'Aucun tirage';
-  document.getElementById('listeTickets').innerHTML = tickets.map(t=>{
-    let bons = resultats.dernier ? t.numeros.filter(n=> resultats.dernier.includes(n)).length : 0;
-    let classe = bons>=3 ? 'ticket gagnant' : 'ticket';
-    return `<div class="${classe}">👤 ${t.nom} - ${t.tel}<br>🎲 ${t.numeros.join(' - ')}<br>💰 ${t.mise} F - ${bons}/5 bons ${bons>=3?'🏆 GAGNANT':''}</div>`;
-  }).join('') || 'Aucun ticket pour le moment';
-}
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ADMIN LOTO</title>
+<style>body{font-family:sans-serif;background:#0f172a;color:#fff;padding:15px}h1{color:#facc15;text-align:center}.card{background:#1e293b;padding:14px;border-radius:14px;margin:10px auto;max-width:520px}button{padding:10px 14px;border-radius:10px;border:0;font-weight:900;cursor:pointer;margin:4px}input{padding:12px;border-radius:10px;border:0;width:100%;max-width:520px;box-sizing:border-box}</style></head><body>
+<h1>👑 ADMIN LOTO 5/90</h1><center><input id="code" placeholder="Code admin : 1234"><br><br><button style="background:#facc15" onclick="load()">VOIR LES TICKETS EN DIRECT</button></center>
+<div id="list"></div><div id="recl"></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getDatabase,ref,onValue,update} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const cfg={apiKey:"AIzaSyAT2yhtnH9un6w4cPKsCdijz6ONFqqad4Y",authDomain:"loto590.firebaseapp.com",databaseURL:"https://loto590-default-rtdb.firebaseio.com",projectId:"loto590",storageBucket:"loto590.firebasestorage.app",messagingSenderId:"489454525767",appId:"1:489454525767:web:5919f1dae538ae001b8062"};
+const app=initializeApp(cfg);const db=getDatabase(app);
+window.load=()=>{if(document.getElementById('code').value!=='1234')return alert('Mauvais code');
+onValue(ref(db,'tickets'),snap=>{let h='';let d=snap.val()||{};Object.entries(d).reverse().forEach(([id,t])=>{h+=`<div class="card"><b>${t.code}</b> - ${t.name} (${t.phone})<br>Numéros: ${t.numeros.join(' - ')}<br>Mise: ${t.mise}F - Statut: <b>${t.statut}</b><br>Gain: <b>${t.gain||0}F</b><br>${t.date}<br><br><button style="background:#22c55e" onclick="val('${id}','gagne')">✅ GAGNÉ</button><button style="background:#ef4444;color:#fff" onclick="val('${id}','perdu')">❌ PERDU</button><button style="background:#facc15" onclick="gain('${id}')">💰 MONTANT GAGNÉ</button></div>`});document.getElementById('list').innerHTML=h||'Aucun ticket'});
+onValue(ref(db,'reclamations'),snap=>{let h='<h2>📩 Réclamations</h2>';let d=snap.val()||{};Object.entries(d).reverse().forEach(([id,r])=>{h+=`<div class="card">${r.code} : ${r.message}<br><small>${r.date}</small></div>`});document.getElementById('recl').innerHTML=h})}
+window.val=(id,s)=>update(ref(db,'tickets/'+id),{statut:s});
+window.gain=(id)=>{let m=prompt('Montant gagné en FCFA ? Ex: 50000');if(m)update(ref(db,'tickets/'+id),{gain:Number(m),statut:'gagne'})}
+</script></body></html>
