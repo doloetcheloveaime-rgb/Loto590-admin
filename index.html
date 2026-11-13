@@ -5,56 +5,125 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LOTO 5/90 - ADMIN</title>
 <style>
-  body{font-family:Arial;background:#0f0f0f;color:white;text-align:center;padding:20px}
-  .box{background:#1a1a1a;padding:20px;border-radius:15px;max-width:400px;margin:20px auto}
-  input{width:90%;padding:12px;border-radius:10px;border:none;margin:10px 0;font-size:16px;text-align:center}
-  button{width:95%;padding:13px;border:none;border-radius:10px;background:#facc15;font-weight:bold;font-size:16px;cursor:pointer}
-  .card{background:#222;padding:15px;border-radius:12px;margin:10px 0;text-align:left}
-  .hidden{display:none}
+body{background:#111;color:#fff;font-family:Arial;padding:15px;margin:0}
+h1{text-align:center}
+.box{background:#222;padding:15px;border-radius:15px;margin-bottom:15px}
+input,button{width:100%;padding:12px;margin:5px 0;border-radius:10px;border:none;font-size:16px;box-sizing:border-box}
+input{background:#333;color:#fff}
+button{background:#FFD700;font-weight:bold;cursor:pointer}
+.btn-red{background:#ff3b30;color:#fff}
+.btn-green{background:#28a745;color:#fff}
+.ticket{background:#333;padding:10px;border-radius:10px;margin:5px 0}
+.gagnant{border:2px solid #FFD700}
 </style>
 </head>
 <body>
-
-<h1>👑 LOTO 5/90</h1>
-<p>ESPACE ADMIN - BOSS UNIQUEMENT</p>
-
-<!-- CONNEXION -->
 <div id="login" class="box">
-  <h2>Connexion</h2>
-  <input type="password" id="pass" placeholder="Ton mot de passe secret">
-  <button onclick="login()">ENTRER</button>
-  <p id="error" style="color:red"></p>
+<h1>👑 LOTO 5/90</h1>
+<p style="text-align:center">ESPACE ADMIN - BOSS UNIQUEMENT</p>
+<input type="password" id="mdp" placeholder="Mot de passe Boss">
+<button onclick="connexion()">ENTRER 👑</button>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dash" class="box hidden">
-  <h2>Bienvenue Boss 👑</h2>
-  <p id="date"></p>
-  <div class="card">💰 <b>Total encaissé aujourd'hui :</b><br>0 F CFA</div>
-  <div class="card">🎟️ <b>Tickets vendus :</b><br>0</div>
-  <div class="card">🏆 <b>Gagnants à payer :</b><br>0</div>
-  <div class="card">🎲 <b>Dernier tirage :</b><br>Pas encore de tirage</div>
-  <button onclick="logout()" style="background:#ef4444;color:white">DÉCONNEXION</button>
+<div id="admin" style="display:none">
+<h1>👑 Bienvenue Boss</h1>
+<p id="date" style="text-align:center"></p>
+
+<div class="box">
+<h3>💰 Total encaissé aujourd'hui : <span id="total">0</span> F CFA</h3>
+<h3>🎫 Tickets vendus : <span id="nbTickets">0</span></h3>
+<h3>🏆 Gagnants à payer : <span id="nbGagnants">0</span></h3>
+<h3>🎲 Dernier tirage : <span id="dernierTirage">Pas encore</span></h3>
+</div>
+
+<div class="box">
+<h3>🎲 CRÉER UN TIRAGE</h3>
+<input type="date" id="dateTirage">
+<input type="time" id="heureTirage" value="20:00">
+<button class="btn-green" onclick="creerTirage()">CRÉER LE TIRAGE ✅</button>
+<div id="listeTirages"></div>
+</div>
+
+<div class="box">
+<h3>🏆 NUMÉROS GAGNANTS</h3>
+<p>Choisis le tirage puis entre les 5 numéros :</p>
+<input type="number" id="n1" placeholder="Numéro 1 (1-90)" min="1" max="90">
+<input type="number" id="n2" placeholder="Numéro 2" min="1" max="90">
+<input type="number" id="n3" placeholder="Numéro 3" min="1" max="90">
+<input type="number" id="n4" placeholder="Numéro 4" min="1" max="90">
+<input type="number" id="n5" placeholder="Numéro 5" min="1" max="90">
+<button onclick="publierResultat()">PUBLIER LES RÉSULTATS 🏆</button>
+</div>
+
+<div class="box">
+<h3>🎫 TICKETS DES JOUEURS</h3>
+<button onclick="ajouterTicketTest()">+ Ajouter un ticket test</button>
+<div id="listeTickets"></div>
+<button class="btn-red" onclick="effacerTout()">EFFACER TOUT 🗑️</button>
+</div>
+
+<button class="btn-red" onclick="deconnexion()">DÉCONNEXION</button>
 </div>
 
 <script>
-// ▼▼▼ C'EST ICI QUE TOI TU METS TON MOT DE PASSE ▼▼▼
-// Efface "atchissou229lot" et mets ton mot de passe à toi
 const MOT_DE_PASSE_ADMIN = "atchissou229lot";
-// ▲▲▲ ▲▲▲ ▲▲▲
+let tirages = JSON.parse(localStorage.getItem('tirages')||'[]');
+let tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+let resultats = JSON.parse(localStorage.getItem('resultats')||'{}');
 
-function login(){
-  const p = document.getElementById('pass').value;
-  if(p === MOT_DE_PASSE_ADMIN){
-    document.getElementById('login').classList.add('hidden');
-    document.getElementById('dash').classList.remove('hidden');
-    document.getElementById('date').innerText = new Date().toLocaleString('fr-FR');
-  } else {
-    document.getElementById('error').innerText = "❌ Mot de passe faux";
-  }
+document.getElementById('date').innerText = new Date().toLocaleString('fr-FR');
+
+function connexion(){
+  if(document.getElementById('mdp').value === MOT_DE_PASSE_ADMIN){
+    document.getElementById('login').style.display='none';
+    document.getElementById('admin').style.display='block';
+    afficher();
+  } else { alert('Mauvais mot de passe Boss !'); }
 }
-function logout(){
-  location.reload();
+function deconnexion(){ location.reload(); }
+function sauvegarder(){
+  localStorage.setItem('tirages', JSON.stringify(tirages));
+  localStorage.setItem('tickets', JSON.stringify(tickets));
+  localStorage.setItem('resultats', JSON.stringify(resultats));
+  afficher();
+}
+function creerTirage(){
+  let d = document.getElementById('dateTirage').value;
+  let h = document.getElementById('heureTirage').value;
+  if(!d){ alert('Choisis une date !'); return; }
+  tirages.push({date:d, heure:h, id: Date.now()});
+  sauvegarder(); alert('Tirage créé Boss ! 👑');
+}
+function publierResultat(){
+  let nums = [n1.value,n2.value,n3.value,n4.value,n5.value].map(Number);
+  if(nums.some(n=>!n || n<1 || n>90)){ alert('Mets les 5 numéros entre 1 et 90'); return; }
+  resultats.dernier = nums;
+  resultats.date = new Date().toLocaleString('fr-FR');
+  sauvegarder(); alert('Résultats publiés : ' + nums.join(' - '));
+}
+function ajouterTicketTest(){
+  let nums = [];
+  while(nums.length<5){ let n=Math.floor(Math.random()*90)+1; if(!nums.includes(n)) nums.push(n); }
+  tickets.push({id: Date.now(), numeros: nums, mise: 500, nom: 'Test Joueur', tel: '97000000'});
+  sauvegarder();
+}
+function effacerTout(){ if(confirm('Effacer tout Boss ?')){ tirages=[]; tickets=[]; resultats={}; sauvegarder(); } }
+function afficher(){
+  let total = tickets.reduce((s,t)=>s+t.mise,0);
+  document.getElementById('total').innerText = total;
+  document.getElementById('nbTickets').innerText = tickets.length;
+  let gagnants = 0;
+  if(resultats.dernier){
+    gagnants = tickets.filter(t=> t.numeros.filter(n=> resultats.dernier.includes(n)).length>=3).length;
+    document.getElementById('dernierTirage').innerText = resultats.dernier.join(' - ');
+  }
+  document.getElementById('nbGagnants').innerText = gagnants;
+  document.getElementById('listeTirages').innerHTML = tirages.map(t=>`<div class="ticket">📅 ${t.date} à ${t.heure}</div>`).join('') || 'Aucun tirage';
+  document.getElementById('listeTickets').innerHTML = tickets.map(t=>{
+    let bons = resultats.dernier ? t.numeros.filter(n=> resultats.dernier.includes(n)).length : 0;
+    let classe = bons>=3 ? 'ticket gagnant' : 'ticket';
+    return `<div class="${classe}">👤 ${t.nom} - ${t.tel}<br>🎲 ${t.numeros.join(' - ')}<br>💰 ${t.mise} F - ${bons}/5 bons ${bons>=3?'🏆 GAGNANT':''}</div>`;
+  }).join('') || 'Aucun ticket pour le moment';
 }
 </script>
 </body>
