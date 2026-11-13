@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOTO 5/90 - ADMIN</title>
+<style>
+  body{font-family:Arial;background:#0f0f0f;color:white;text-align:center;padding:20px}
+  .box{background:#1a1a1a;padding:20px;border-radius:15px;max-width:400px;margin:20px auto}
+  input{width:90%;padding:12px;border-radius:10px;border:none;margin:10px 0;font-size:16px;text-align:center}
+  button{width:95%;padding:13px;border:none;border-radius:10px;background:#facc15;font-weight:bold;font-size:16px;cursor:pointer}
+  .card{background:#222;padding:15px;border-radius:12px;margin:10px 0;text-align:left}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+
+<h1>👑 LOTO 5/90</h1>
+<p>ESPACE ADMIN - BOSS UNIQUEMENT</p>
+
+<!-- CONNEXION -->
+<div id="login" class="box">
+  <h2>Connexion</h2>
+  <input type="password" id="pass" placeholder="Ton mot de passe secret">
+  <button onclick="login()">ENTRER</button>
+  <p id="error" style="color:red"></p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash" class="box hidden">
+  <h2>Bienvenue Boss 👑</h2>
+  <p id="date"></p>
+  <div class="card">💰 <b>Total encaissé aujourd'hui :</b><br>0 F CFA</div>
+  <div class="card">🎟️ <b>Tickets vendus :</b><br>0</div>
+  <div class="card">🏆 <b>Gagnants à payer :</b><br>0</div>
+  <div class="card">🎲 <b>Dernier tirage :</b><br>Pas encore de tirage</div>
+  <button onclick="logout()" style="background:#ef4444;color:white">DÉCONNEXION</button>
+</div>
+
+<script>
+// ▼▼▼ C'EST ICI QUE TOI TU METS TON MOT DE PASSE ▼▼▼
+// Efface "atchissou229lot" et mets ton mot de passe à toi
+const MOT_DE_PASSE_ADMIN = "atchissou229lot";
+// ▲▲▲ ▲▲▲ ▲▲▲
+
+function login(){
+  const p = document.getElementById('pass').value;
+  if(p === MOT_DE_PASSE_ADMIN){
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('dash').classList.remove('hidden');
+    document.getElementById('date').innerText = new Date().toLocaleString('fr-FR');
+  } else {
+    document.getElementById('error').innerText = "❌ Mot de passe faux";
+  }
+}
+function logout(){
+  location.reload();
+}
+</script>
+</body>
+</html>
