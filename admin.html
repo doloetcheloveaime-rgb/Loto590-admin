@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADMIN - LOTO 590</title>
+<style>body{margin:0;background:#0f172a;color:#fff;font-family:Arial}header{background:#dc2626;color:#fff;padding:14px;text-align:center;font-weight:900;font-size:22px}.card{background:#1e293b;margin:12px;border-radius:14px;padding:14px}.btnRouge{width:100%;padding:13px;border:none;border-radius:10px;background:#dc2626;color:#fff;font-weight:900;margin-top:10px}.btnJaune{width:100%;padding:13px;border:none;border-radius:10px;background:#facc15;font-weight:900;margin-top:10px}.btnVert{width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:900;margin-top:10px}input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;box-sizing:border-box;margin-top:8px;color:#000}.tabBtn{flex:1;padding:11px;border:none;border-radius:20px;background:#334155;color:#fff;font-weight:bold}.tabBtn.actif{background:#facc15;color:#000}.box{background:#fff;color:#111;border-radius:12px;padding:12px;margin-top:10px}</style>
+</head><body>
+<header>🔐 ADMIN - LOTO 590<div style="font-size:12px;font-weight:normal;">Patron seulement - Recharge / Retrait / Résultats</div></header>
+<div class="card" id="loginAdmin">
+<h2>🔐 CONNEXION ADMIN</h2>
+<input id="adminPass" type="password" placeholder="Mot de passe Admin...">
+<button class="btnRouge" onclick="loginAdmin()">ENTRER ADMIN</button>
+<p style="font-size:12px;color:#94a3b8;">Mot de passe par défaut : <b>admin123</b> - Tu le changeras après.</p>
+</div>
+<div id="adminZone" style="display:none;">
+<div class="card"><h2>👋 Bonjour Patron</h2><p>Solde total en jeu : <b id="totalSolde">0 FCFA</b></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;">
+<button class="tabBtn actif" id="tab1" onclick="showTab('recharge')">💰 RECHARGER</button>
+<button class="tabBtn" id="tab2" onclick="showTab('retrait')">🏦 RETRAIT</button>
+<button class="tabBtn" id="tab3" onclick="showTab('resultats')">🎲 RÉSULTATS</button>
+<button class="tabBtn" id="tab4" onclick="showTab('tickets')">🎫 TICKETS</button>
+</div></div><div class="card" id="boxRecharge">
+<h2>💰 RECHARGER UN CLIENT PAR GMAIL</h2>
+<p style="font-size:13px;color:#cbd5e1;">Le client t'a envoyé son Gmail sur WhatsApp. Tu le recharges ici.</p>
+<div class="box"><label>Gmail du client</label><input id="gmailClient" placeholder="Ex: client@gmail.com"><label>Montant reçu (FCFA)</label><input id="montantClient" type="number" value="1000"><button class="btnVert" onclick="rechargerClient()">✅ RECHARGER CE GMAIL</button><div id="msgRecharge"></div></div>
+<h3 style="margin-top:14px;">📋 Dernières recharges</h3><div id="listeRecharges"></div>
+</div>
+<div class="card" id="boxRetrait" style="display:none;">
+<h2>🏦 VALIDER UN RETRAIT - MOMO À MOMO</h2>
+<p style="font-size:13px;color:#cbd5e1;">Le client t'a envoyé Gmail + MoMo + Montant. Tu fais MoMo à MoMo, puis tu valides ici.</p>
+<div class="box"><label>Gmail du client</label><input id="gmailRetrait" placeholder="Ex: client@gmail.com"><label>Numéro MoMo du client</label><input id="momoRetrait" placeholder="Ex: 01 90 00 00 00"><label>Montant à envoyer (FCFA)</label><input id="montantRetraitAdmin" type="number" placeholder="Ex: 5000"><button class="btnRouge" onclick="validerRetraitAdmin()">✅ J'AI PAYÉ - VALIDER RETRAIT</button><div id="msgRetrait"></div></div>
+<h3 style="margin-top:14px;">📋 Derniers retraits</h3><div id="listeRetraits"></div>
+</div>
+<div class="card" id="boxResultats" style="display:none;">
+<h2>🎲 PUBLIER RÉSULTAT TIRAGE</h2>
+<div class="box"><label>Pays + Tirage</label><input id="tirageNom" placeholder="Ex: BENIN - 08H"><label>5 numéros gagnants (séparés par - )</label><input id="numsGagnants" placeholder="Ex: 5 - 12 - 23 - 45 - 89"><button class="btnJaune" onclick="publierResultat()">📢 PUBLIER RÉSULTAT</button><div id="msgResultat"></div></div>
+<h3 style="margin-top:14px;">📋 Derniers résultats</h3><div id="listeResultats"></div>
+</div>
+<div class="card" id="boxTickets" style="display:none;">
+<h2>🎫 TOUS LES TICKETS</h2>
+<div id="listeTickets"></div>
+<button class="btnRouge" onclick="effacerTickets()">🗑 Effacer tous les tickets</button>
+</div>
+<div class="card"><button onclick="logoutAdmin()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#334155;color:#fff;font-weight:bold;">DÉCONNEXION ADMIN</button></div>
+</div><script>
+function loginAdmin(){var p=document.getElementById('adminPass').value;if(p==='admin123'){document.getElementById('loginAdmin').style.display='none';document.getElementById('adminZone').style.display='block';afficherTout();}else{alert('Mot de passe incorrect');}}
+function logoutAdmin(){document.getElementById('adminZone').style.display='none';document.getElementById('loginAdmin').style.display='block';}
+function showTab(t){['recharge','retrait','resultats','tickets'].forEach(function(x){document.getElementById('box'+x.charAt(0).toUpperCase()+x.slice(1)).style.display=x===t?'block':'none';document.getElementById('tab'+(x==='recharge'?1:x==='retrait'?2:x==='resultats'?3:4)).classList.toggle('actif',x===t);});}
+function getList(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}}
+function setList(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function rechargerClient(){var g=document.getElementById('gmailClient').value;var m=parseInt(document.getElementById('montantClient').value||'0');if(!g||!m){alert('Mets Gmail + montant');return;}var soldes=JSON.parse(localStorage.getItem('admin_soldes')||'{}');soldes[g]=(soldes[g]||0)+m;localStorage.setItem('admin_soldes',JSON.stringify(soldes));var l=getList('admin_recharges');l.unshift({gmail:g,montant:m,date:new Date().toLocaleString()});setList('admin_recharges',l);document.getElementById('msgRecharge').innerHTML='<div style="background:#dcfce7;padding:10px;border-radius:10px;margin-top:8px;">✅ <b>'+g+'</b> rechargé de <b>'+m+' FCFA</b><br>Nouveau solde : <b>'+soldes[g]+' FCFA</b></div>';alert('✅ Rechargé !\n'+g+' : +'+m+' FCFA\nNouveau solde : '+soldes[g]);document.getElementById('gmailClient').value='';afficherTout();}
+function validerRetraitAdmin(){var g=document.getElementById('gmailRetrait').value;var mo=document.getElementById('momoRetrait').value;var m=parseInt(document.getElementById('montantRetraitAdmin').value||'0');if(!g||!mo||!m){alert('Mets Gmail + MoMo + montant');return;}var soldes=JSON.parse(localStorage.getItem('admin_soldes')||'{}');var s=soldes[g]||0;if(m>s){if(!confirm('Attention solde de '+g+' = '+s+' FCFA, tu veux quand même valider '+m+' ?'))return;}soldes[g]=Math.max(0,s-m);localStorage.setItem('admin_soldes',JSON.stringify(soldes));var l=getList('admin_retraits');l.unshift({gmail:g,momo:mo,montant:m,date:new Date().toLocaleString()});setList('admin_retraits',l);document.getElementById('msgRetrait').innerHTML='<div style="background:#dcfce7;padding:10px;border-radius:10px;margin-top:8px;">✅ Retrait validé : <b>'+m+' FCFA</b> envoyé à <b>'+mo+'</b> pour <b>'+g+'</b><br>Nouveau solde : <b>'+soldes[g]+' FCFA</b></div>';alert('✅ Retrait validé !\nTu as payé '+m+' FCFA à '+mo);document.getElementById('gmailRetrait').value='';document.getElementById('momoRetrait').value='';afficherTout();}
+function publierResultat(){var t=document.getElementById('tirageNom').value;var n=document.getElementById('numsGagnants').value;if(!t||!n){alert('Mets tirage + 5 numéros');return;}var l=getList('admin_resultats');l.unshift({tirage:t,nums:n,date:new Date().toLocaleString()});setList('admin_resultats',l);document.getElementById('msgResultat').innerHTML='<div style="background:#fef3c7;padding:10px;border-radius:10px;margin-top:8px;">✅ Résultat publié : <b>'+t+'</b> = <b>'+n+'</b></div>';afficherTout();}
+function effacerTickets(){if(confirm('Effacer tous les tickets ?')){localStorage.removeItem('admin_tickets');afficherTout();}}
+function afficherTout(){var soldes=JSON.parse(localStorage.getItem('admin_soldes')||'{}');var total=0;Object.keys(soldes).forEach(function(k){total+=soldes[k]});document.getElementById('totalSolde').textContent=total+' FCFA';var h='';getList('admin_recharges').slice(0,10).forEach(function(r){h+='<div class="box">💰 <b>'+r.gmail+'</b> +'+r.montant+' FCFA<br><span style="font-size:12px;">'+r.date+'</span></div>'});document.getElementById('listeRecharges').innerHTML=h||'<p style="color:#94a3b8;">Aucune recharge pour le moment.</p>';h='';getList('admin_retraits').slice(0,10).forEach(function(r){h+='<div class="box">🏦 <b>'+r.gmail+'</b> -> '+r.momo+' : '+r.montant+' FCFA<br><span style="font-size:12px;">'+r.date+'</span></div>'});document.getElementById('listeRetraits').innerHTML=h||'<p style="color:#94a3b8;">Aucun retrait pour le moment.</p>';h='';getList('admin_resultats').slice(0,10).forEach(function(r){h+='<div class="box">🎲 <b>'+r.tirage+'</b> = <b>'+r.nums+'</b><br><span style="font-size:12px;">'+r.date+'</span></div>'});document.getElementById('listeResultats').innerHTML=h||'<p style="color:#94a3b8;">Aucun résultat.</p>';h='';var tix=getList('admin_tickets');if(!tix.length)h='<p style="color:#94a3b8;">Aucun ticket. Les tickets du client apparaîtront ici quand on les reliera.</p>';else tix.forEach(function(r){h+='<div class="box">'+JSON.stringify(r)+'</div>'});document.getElementById('listeTickets').innerHTML=h;}
+</script></body></html>
